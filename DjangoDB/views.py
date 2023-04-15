@@ -27,7 +27,21 @@ def ListOfCountriesWichWeHaveDataOn(request):
     json_data = json.dumps(new_data)
     data_dict = json.loads(json_data)
     dbname = get_database()
-    collection_name = dbname["ListOfCountries"]
-    collection_name.insert_one({"_id": str(ObjectId()), "data": data_dict})
+    collection = dbname['ListOfCountries']
+    count = collection.count_documents({})
+
+    print(dbname.list_collection_names())
+    count = collection.count_documents({})
+    if count > 0:
+        cursor = collection.find()
+        # print(json.loads(json.dumps(cursor[0]))['_id'])
+        collection_name = dbname["ListOfCountries"]
+        # print(cursor[0]["_id"])
+        # update
+        collection_name.update_one({"_id":cursor[0]["_id"]},{'$set': {"data": data_dict}})
+    else:
+        collection_name = dbname["ListOfCountries"]
+        # new Table
+        collection_name.insert_one({"_id": str(ObjectId()), "data": data_dict})
 
     return JsonResponse(data_dict, safe=False)
