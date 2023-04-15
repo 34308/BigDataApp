@@ -19,5 +19,5 @@ from django.urls import path
 from DjangoDB import views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('fetch-data/', views.ListOfCountriesWichWeHaveDataOn),
+    path('ListOfAllCountries/', views.ListOfCountriesWichWeHaveDataOn),
 ]

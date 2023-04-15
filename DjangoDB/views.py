@@ -22,18 +22,12 @@ def ListOfCountriesWichWeHaveDataOn(request):
     data = response.json()
     countries = pd.DataFrame(data["Countries"])
     listofCounteirs = countries["Country"]
-    json_str = json.loads(listofCounteirs.to_json(orient='values'))
-    strs = '{countries:' + str(json_str) + '}'
-
     countries = [c['Country'] for c in data['Countries']]
     new_data = {"countries": countries}
-    print(new_data)
-
     json_data = json.dumps(new_data)
     data_dict = json.loads(json_data)
-
     dbname = get_database()
     collection_name = dbname["ListOfCountries"]
     collection_name.insert_one({"_id": str(ObjectId()), "data": data_dict})
 
-    return JsonResponse(new_data, safe=False)
+    return JsonResponse(data_dict, safe=False)
