@@ -1,10 +1,7 @@
-from django.shortcuts import render
 import requests
-from .models import Country
 import urllib, json
 from django.http import JsonResponse
 import pandas as pd
-from dateutil import parser
 from pymongo import MongoClient
 
 def get_database():
