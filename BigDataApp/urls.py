@@ -20,5 +20,7 @@ from DjangoDB import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ListOfAllCountries/', views.ListOfCountriesWichWeHaveDataOn),
-    path('covid-plot/<str:country>/', views.covidPlot, name='covid-plot'),
+    path('covid-confirmed-cases-plot/<str:country>/', views.allConfirmedCasesForCountryTillNowPlot, name='covid-plot'),
+    path('covid-death-cases-plot/<str:country>/', views.allDeathCasesForCountryTillNowPlot),
+    path('most-deaths/', views.CounrtyWithMostDeaths)
 ]
