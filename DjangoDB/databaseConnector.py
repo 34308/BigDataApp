@@ -41,3 +41,29 @@ def updateOrCrateDataTableWithIdentifier(nameOfCollection,dataToUpload,name):
         collection_name = dbname[nameOfCollection]
         # new Table
         collection_name.insert_one({"_id": str(ObjectId()),"_name":name, "data": dataToUpload})
+def updateOrCrateDataTableWithIdentifier(nameOfCollection,dataToUpload,name):
+    dbname = getDatabase()
+    collection = dbname[nameOfCollection]
+    results= collection.find_one({"_name":name})
+
+    if results:
+
+        collection_name = dbname[nameOfCollection]
+        # update
+        collection_name.update_one({"_id": results["_id"],"_name":name}, {'$set': {"data": dataToUpload}})
+    else:
+
+        collection_name = dbname[nameOfCollection]
+        # new Table
+        collection_name.insert_one({"_id": str(ObjectId()),"_name":name, "data": dataToUpload})
+
+def GetDataTableWithIdentifier(nameOfCollection,name):
+    dbname = getDatabase()
+    collection = dbname[nameOfCollection]
+    results= collection.find_one({"_name":name})
+
+    if results:
+        # update
+        return  results
+    else:
+        raise Exception("No such table")
