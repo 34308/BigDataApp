@@ -19,8 +19,8 @@ from django.urls import path
 from DjangoDB import views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ListOfAllCountries/', views.ListOfCountriesWichWeHaveDataOn),
+    path('ListOfAllCountries/', views.listOfCountriesWichWeHaveDataOn),
     path('covid-confirmed-cases-plot/<str:country>/', views.allConfirmedCasesForCountryTillNowPlot, name='covid-plot'),
     path('covid-death-cases-plot/<str:country>/', views.allDeathCasesForCountryTillNowPlot),
-    path('most-deaths/', views.CounrtyWithMostDeaths)
+    path('most-deaths/', views.counrtyWithMostDeaths)
 ]
