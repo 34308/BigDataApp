@@ -22,5 +22,7 @@ urlpatterns = [
     path('ListOfAllCountries/', views.listOfCountriesWichWeHaveDataOn),
     path('covid-confirmed-cases-plot/<str:country>/', views.allConfirmedCasesForCountryTillNowPlot, name='covid-plot'),
     path('covid-death-cases-plot/<str:country>/', views.allDeathCasesForCountryTillNowPlot),
+    path('covid-recovered-cases-plot/<str:country>/', views.allRecoveredCasesForCountryTillNowPlot),
+    path('update-all-data/', views.updateAllData),
     path('most-deaths/', views.counrtyWithMostDeaths)
 ]
