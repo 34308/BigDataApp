@@ -4,16 +4,15 @@ from django.apps import AppConfig
 import threading
 import time
 
-from DjangoDB.updating import keepUpdatingDatabase
+from DjangoDB.updating import keepUpdatingDatabase, hasAllCountriesBeenUpdated
 
 
 class DjangodbConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'DjangoDB'
 
-    my_thread = threading.Thread(target=keepUpdatingDatabase)
-
-    while True:
+    my_thread = threading.Thread()
+    while not hasAllCountriesBeenUpdated():
         if my_thread.is_alive():
             pass
         else:

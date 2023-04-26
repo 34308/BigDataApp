@@ -78,6 +78,7 @@ def updateOrCrateDataTableWithIdentifierAndTimestampWithDb(dbname, nameOfCollect
         # update
         collection_name.update_one({"_id": results["_id"], "_name": name, "_lastUpdated": datetime.now()},
                                    {'$set': {"data": dataToUpload}})
+
     else:
 
         collection_name = dbname[nameOfCollection]
@@ -86,23 +87,21 @@ def updateOrCrateDataTableWithIdentifierAndTimestampWithDb(dbname, nameOfCollect
             {"_id": str(ObjectId()), "_name": name, "_lastUpdated": datetime.now(), "data": dataToUpload})
 
 
-def updateOrCrateDataTableWithIdentifierAndCase(nameOfCollection, dataToUpload, name,case):
-    dbname = getDatabase()
+
+def updateOrCrateDataTableWithIdentifierAndCase( dbname,nameOfCollection, dataToUpload, name):
     collection = dbname[nameOfCollection]
-    results = collection.find_one({"_name": name,"_case": case})
+    results = collection.find_one({"_name": name})
 
     if results:
-
         collection_name = dbname[nameOfCollection]
         # update
-        collection_name.update_one({"_id": results["_id"], "_name": name, "_case": case},
+        collection_name.update_one({"_id": results["_id"], "_name": name},
                                    {'$set': {"data": dataToUpload}})
     else:
-
         collection_name = dbname[nameOfCollection]
         # new Table
         collection_name.insert_one(
-            {"_id": str(ObjectId()), "_name": name, "_case": case, "data": dataToUpload})
+            {"_id": str(ObjectId()), "_name": name, "data": dataToUpload})
 
 
 def GetDataTableWithIdentifier(nameOfCollection, name):
@@ -112,15 +111,16 @@ def GetDataTableWithIdentifier(nameOfCollection, name):
 
     if results:
         # update
+        dbname.client.close()
         return results
     else:
         raise Exception("No such table")
 
 
-def GetDataUpdateTableWithIdentifierAndCase(nameOfCollection, country, case):
+def GetDataUpdateTableWithIdentifierAndCase(nameOfCollection, country):
     dbname = getDatabase()
     collection = dbname[nameOfCollection]
-    results = collection.find_one({"_name": country, "_case": case})
+    results = collection.find_one({"_name": country})
 
     if results:
         # update

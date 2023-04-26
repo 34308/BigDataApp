@@ -14,11 +14,9 @@ import base64
 import time
 from django.http import JsonResponse
 
-from DjangoDB.Tables import listOfCountries, countryWithMostDeaths, recoveredCasesForCountries, deathCasesForCountries, \
-    confirmedCasesForCountries, Cases, CaseTable, basic_date
+from DjangoDB.Tables import listOfCountries, countryWithMostDeaths,Cases, basic_date, casesForCountry
 from DjangoDB.databaseConnector import updateOrCrateDataTable, updateOrCrateDataTableWithIdentifier, getDatabase, \
-    GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb, \
-    updateOrCrateDataTableWithIdentifierAndTimestamp
+    GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb
 from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase
 
 
@@ -53,21 +51,21 @@ def counrtyWithMostDeaths(request):
 
 def CasesForCountryTillNowFromDatabase(request, case, country):
     country = country.lower()
-    url_part, status, table = switchForCase(case)
-    dataTable = GetDataTableWithIdentifier(table, country)
+    url_part, status, = switchForCase(case)
+    dataTable = GetDataTableWithIdentifier(casesForCountry, country)
 
     df = pd.json_normalize(dataTable["data"])
-    buffer = plotCreator(country, status, "Cases", "Date", df)
+    buffer = plotCreator(country, status, status, "Date", df)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
-def CasesForCountryTillNowFromNet(request, case, country):
-    country= country.lower()
-    url_part, status, table = switchForCase(case)
+
+
+def getAllCasesForCountryToDatabase(request, country):
+    country = country.lower()
     day, month, year = getCurrentDayMonthYear()
-    url = f'https://api.covid19api.com/country/' + country + f'/status/{url_part}/live?from=2020-03-01T00:00:00Z&to=' + str(
-        year) + '-0' + str(month) + '-' + str(day) + 'T00:00:00Z'
+    url = f'https://api.covid19api.com/country/' + country + f'?from=2020-03-01T00:00:00Z&to=' + str(year) + '-0' + str(month) + '-' + str(day) + 'T00:00:00Z'
     print(url)
     response = requests.get(url)
     data = response.json()
@@ -75,28 +73,6 @@ def CasesForCountryTillNowFromNet(request, case, country):
     df = df.drop(["CountryCode", "Province", "City", "CityCode", "Lat", "Lon"], axis=1)
     json_str = df.to_json(orient="records")
 
-    updateOrCrateDataTableWithIdentifier(table, json.loads(json_str), country)
-    buffer = plotCreator(country, status, "Cases", "Date", df)
-
-    return HttpResponse(buffer.getvalue(), content_type="image/png")
-
-
-def getAllCasesForCountryToDatabase(request, country):
-    country = country.lower()
-
-    cases = ["confirmed", "death", "recovered"]
-    for case in cases:
-        url_part, status, table = switchForCase(case)
-        day, month, year = getCurrentDayMonthYear()
-        url = f'https://api.covid19api.com/country/' + country + f'/status/{url_part}/live?from=2020-03-01T00:00:00Z&to=' + str(
-            year) + '-0' + str(month) + '-' + str(day) + 'T00:00:00Z'
-        print(url)
-        response = requests.get(url)
-        data = response.json()
-        df = pd.json_normalize(data)
-        df = df.drop(["CountryCode", "Province", "City", "CityCode", "Lat", "Lon"], axis=1)
-        json_str = df.to_json(orient="records")
-
-        updateOrCrateDataTableWithIdentifier(nameOfCollection= table,dataToUpload= json.loads(json_str), name= country)
+    updateOrCrateDataTableWithIdentifier(nameOfCollection=casesForCountry, dataToUpload= json.loads(json_str), name= country)
     result_json = {"data":[f"Confirmed, Deaths, Recovered cases for {country}, correctly saved to database"]}
     return JsonResponse(result_json, safe=False)

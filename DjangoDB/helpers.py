@@ -3,9 +3,6 @@ import io
 import matplotlib.pyplot as plt
 import math
 
-from DjangoDB.Tables import confirmedCasesForCountries, deathCasesForCountries, recoveredCasesForCountries
-
-
 def getCurrentDayMonthYear():
     day = datetime.date.today().day
     month = datetime.date.today().month
@@ -13,14 +10,20 @@ def getCurrentDayMonthYear():
     return day, month, year
 
 
+def deleteAllParenthese(country):
+    if '(' in str(country):
+         country = str(country).replace("(", "").replace(")", "")
+    print(country)
+    return country
+
+
 def switchForCase(case):
     if case == "confirmed":
-        return "confirmed", "Confirmed", confirmedCasesForCountries
+        return "confirmed", "Confirmed"
     elif case == "death":
-        return "deaths", "Deaths", deathCasesForCountries
+        return "deaths", "Deaths"
     elif case == "recovered":
-        return 'recovered', "Recovered", recoveredCasesForCountries
-
+        return 'recovered', "Recovered"
 
 def plotCreator(country, case, ylabel, xlabel, df):
     fig, ax = plt.subplots()
