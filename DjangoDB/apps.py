@@ -12,10 +12,12 @@ class DjangodbConfig(AppConfig):
     name = 'DjangoDB'
 
     my_thread = threading.Thread()
-    while not hasAllCountriesBeenUpdated():
+    beenUpdate=hasAllCountriesBeenUpdated()
+    while not beenUpdate:
         if my_thread.is_alive():
             pass
         else:
+            beenUpdate = hasAllCountriesBeenUpdated()
             my_thread = threading.Thread(target=keepUpdatingDatabase)
             my_thread.start()
         time.sleep(300)
