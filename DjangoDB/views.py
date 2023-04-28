@@ -19,7 +19,6 @@ from DjangoDB.databaseConnector import updateOrCrateDataTable, updateOrCrateData
     GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb
 from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase
 
-
 def listOfCountriesWichWeHaveDataOn(request):
     response = requests.get("https://api.covid19api.com/summary")
     data = response.json()
@@ -76,3 +75,4 @@ def getAllCasesForCountryToDatabase(request, country):
     updateOrCrateDataTableWithIdentifier(nameOfCollection=casesForCountry, dataToUpload= json.loads(json_str), name= country)
     result_json = {"data":[f"Confirmed, Deaths, Recovered cases for {country}, correctly saved to database"]}
     return JsonResponse(result_json, safe=False)
+
