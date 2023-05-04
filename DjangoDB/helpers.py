@@ -13,7 +13,6 @@ def getCurrentDayMonthYear():
 def deleteAllParenthese(country):
     if '(' in str(country):
          country = str(country).replace("(", "").replace(")", "")
-    print(country)
     return country
 
 

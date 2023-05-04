@@ -61,7 +61,6 @@ def crateTodayUpdateList():
     db=getDatabase()
     countries = data_dict['Slug']
     for country in countries:
-        print(country)
         updateTimestampForCountry(db,country)
 def updateTimestampForCountry(db,country):
     new_data = [{"lastUpdated": str(datetime.now()),"name": country}]
@@ -70,13 +69,11 @@ def updateTimestampForCountry(db,country):
     updateOrCrateDataTableWithIdentifierAndCase(db,updateList, data_dict, country)
 
 def hasAllCountriesBeenUpdated():
-    print("check")
     db=getDatabase()
     col=db.get_collection(updateList)
     size=col.count_documents({})
     dataCataloque=col.find_one({"_name": updateList})["data"]
     for data in dataCataloque:
-        print(data)
         if datetime.now().date()!=datetime.strptime(data["lastUpdated"],"%Y-%m-%d %H:%M:%S.%f").date():
             return False
 
