@@ -54,22 +54,30 @@ def keepUpdatingDatabase():
                 print(f"Error fetching data for {country}: {response.status_code}")
             time.sleep(DELAY)
 
-
+def crateTodayUpdateList():
+    getSlugList()
+    data=GetDataTableWithIdentifier(listOfCountries,slugOfCountries)["data"]
+    data_dict = json.loads(json.dumps(data))
+    db=getDatabase()
+    countries = data_dict['Slug']
+    for country in countries:
+        print(country)
+        updateTimestampForCountry(db,country)
 def updateTimestampForCountry(db,country):
-    new_data = {"lastUpdated": str(datetime.now())}
+    new_data = [{"lastUpdated": str(datetime.now()),"name": country}]
     json_data = json.dumps(new_data)
     data_dict = json.loads(json_data)
     updateOrCrateDataTableWithIdentifierAndCase(db,updateList, data_dict, country)
 
 def hasAllCountriesBeenUpdated():
+    print("check")
     db=getDatabase()
     col=db.get_collection(updateList)
     size=col.count_documents({})
-    if size<195:
-        return False
-    dataCataloque=col.find()
+    dataCataloque=col.find_one({"_name": updateList})["data"]
     for data in dataCataloque:
-        if datetime.now().date()!=datetime.strptime(data["data"]["lastUpdated"],"%Y-%m-%d %H:%M:%S.%f").date():
+        print(data)
+        if datetime.now().date()!=datetime.strptime(data["lastUpdated"],"%Y-%m-%d %H:%M:%S.%f").date():
             return False
 
     return True

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pandas as pd
 import requests
 import urllib, json
 from django.http import JsonResponse, HttpResponse
@@ -90,18 +91,26 @@ def updateOrCrateDataTableWithIdentifierAndTimestampWithDb(dbname, nameOfCollect
 
 def updateOrCrateDataTableWithIdentifierAndCase( dbname,nameOfCollection, dataToUpload, name):
     collection = dbname[nameOfCollection]
-    results = collection.find_one({"_name": name})
-
+    results = collection.find_one({"_name": nameOfCollection})
+    results2 = collection.find_one({"_name": nameOfCollection,"data.name": name})
     if results:
         collection_name = dbname[nameOfCollection]
         # update
-        collection_name.update_one({"_id": results["_id"], "_name": name},
-                                   {'$set': {"data": dataToUpload}})
+        if results2:
+            data=results2["data"]
+
+            df = pd.DataFrame(data,columns=data[0].keys())
+            index = df.index[df['name'] == name]
+            collection_name.update_one({"_id": results2["_id"]},
+                                        {'$set': {f"data.{index[0]}.lastUpdated":  str(datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'))}})
+        else:
+
+            collection_name.update_one({"_id": results["_id"]},{'$push': {"data": {"lastUpdated": str(datetime.now()),"name": name}}})
     else:
         collection_name = dbname[nameOfCollection]
         # new Table
         collection_name.insert_one(
-            {"_id": str(ObjectId()), "_name": name, "data": dataToUpload})
+            {"_id": str(ObjectId()), "_name": nameOfCollection, "data": dataToUpload})
 
 
 def GetDataTableWithIdentifier(nameOfCollection, name):
