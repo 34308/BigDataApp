@@ -31,17 +31,6 @@ def listOfCountriesWichWeHaveDataOn(request):
 
     return JsonResponse(data_dict, safe=False)
 
-
-
-
-Sure, here's a refactored version of the code:
-
-python
-Copy code
-import requests
-import json
-import pandas as pd
-
 def countryWithMostDeathsData(request):
     response = requests.get("https://api.covid19api.com/summary")
     data = response.json()
