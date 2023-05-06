@@ -71,7 +71,7 @@ def updateTimestampForCountry(db,country):
 def hasAllCountriesBeenUpdated():
     db=getDatabase()
     col=db.get_collection(updateList)
-    size=col.count_documents({})
+
     dataCataloque=col.find_one({"_name": updateList})["data"]
     for data in dataCataloque:
         if datetime.now().date()!=datetime.strptime(data["lastUpdated"],"%Y-%m-%d %H:%M:%S.%f").date():
