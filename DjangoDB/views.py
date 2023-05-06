@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from DjangoDB.Tables import listOfCountries, countryWithMostDeaths,Cases, basic_date, casesForCountry
 from DjangoDB.databaseConnector import updateOrCrateDataTable, updateOrCrateDataTableWithIdentifier, getDatabase, \
     GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb
-from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase
+from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase, create_two_countries_plot
 
 def listOfCountriesWichWeHaveDataOn(request):
     response = requests.get("https://api.covid19api.com/summary")
@@ -76,3 +76,15 @@ def getAllCasesForCountryToDatabase(request, country):
     result_json = {"data":[f"Confirmed, Deaths, Recovered cases for {country}, correctly saved to database"]}
     return JsonResponse(result_json, safe=False)
 
+def compare_countries_by_case(request, case, first_country, second_country):
+    first_country = first_country.lower()
+    second_country = second_country.lower()
+    url_part, status, = switchForCase(case)
+    first_country_data_table = GetDataTableWithIdentifier(casesForCountry, first_country)
+    second_country_data_table = GetDataTableWithIdentifier(casesForCountry, second_country)
+
+    first_country_df = pd.json_normalize(first_country_data_table["data"])
+    second_country_df = pd.json_normalize(second_country_data_table["data"])
+    buffer = create_two_countries_plot(first_country, second_country, status, status, "Date", first_country_df, second_country_df)
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")

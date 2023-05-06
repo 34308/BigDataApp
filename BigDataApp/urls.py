@@ -23,5 +23,6 @@ urlpatterns = [
     path('ListOfAllCountries/', views.listOfCountriesWichWeHaveDataOn),
     path('covid-allcases-plot/<str:country>/', views.getAllCasesForCountryToDatabase),
     path('covid-<str:case>-cases-plot-db/<str:country>/', views.CasesForCountryTillNowFromDatabase),
-    path('most-deaths/', views.counrtyWithMostDeaths)
-]
+    path('most-deaths/', views.counrtyWithMostDeaths),
+    path('compareCountries/<str:case>/<str:first_country>/<str:second_country>', views.compare_countries_by_case)
+    ]
