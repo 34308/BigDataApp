@@ -14,7 +14,8 @@ import base64
 import time
 from django.http import JsonResponse
 
-from DjangoDB.Tables import listOfCountries, countryWithMostDeaths,Cases, basic_date, casesForCountry
+from DjangoDB.Tables import listOfCountries, countryWithMostDeaths, Cases, basic_date, casesForCountry, \
+    countryWithLeastDeaths
 from DjangoDB.databaseConnector import updateOrCrateDataTable, updateOrCrateDataTableWithIdentifier, getDatabase, \
     GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb
 from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase, create_two_countries_plot
@@ -30,25 +31,44 @@ def listOfCountriesWichWeHaveDataOn(request):
 
     return JsonResponse(data_dict, safe=False)
 
-
-
-def counrtyWithMostDeaths(request):
+def countryWithMostDeathsData(request):
     response = requests.get("https://api.covid19api.com/summary")
     data = response.json()
     countries = data["Countries"]
+    # Convert JSON data to pandas dataframe
     df = pd.json_normalize(countries)
-    sorted_df = df.sort_values('TotalDeaths', ascending=False)
-    highest_deaths = sorted_df.head(1)
-    result_dict = highest_deaths.to_dict(orient='records')[0]
-    result_dict = {'Country': result_dict['Country'], 'death_Cases': result_dict['TotalDeaths']}
+    # Find country with highest deaths
+    highest_deaths = df.loc[df['TotalDeaths'].idxmax()]
+    # Create result dictionary
+    result_dict = {'Country': highest_deaths['Country'], 'death_Cases': highest_deaths['TotalDeaths']}
+    # Convert dictionary to JSON string
     result_json = json.dumps(result_dict)
-    result_json = json.loads(result_json)
+    # Update or create data table with result JSON
+    updateOrCrateDataTableWithIdentifier(countryWithMostDeaths, result_json, countryWithMostDeaths)
+    # Return JSON response with proper content type
+    return HttpResponse(result_json, content_type='application/json')
 
-    updateOrCrateDataTableWithIdentifier(countryWithMostDeaths, result_json,countryWithMostDeaths)
-    return JsonResponse(result_json, safe=False)
+def countryWithLeastDeathsData(request):
+    response = requests.get("https://api.covid19api.com/summary")
+    data = response.json()
+    countries = data["Countries"]
+
+    # Find country with least deaths
+    least_deaths = min(countries, key=lambda c: c['TotalDeaths'])
+
+    # Create result dictionary
+    result_dict = {'Country': least_deaths['Country'], 'death_Cases': least_deaths['TotalDeaths']}
+
+    # Convert dictionary to JSON string
+    result_json = json.dumps(result_dict)
+    # Return JSON response with proper content type
+    updateOrCrateDataTableWithIdentifier(countryWithLeastDeaths, result_json, countryWithMostDeaths)
+
+    return HttpResponse(result_json,content_type='application/json')
 
 
-def CasesForCountryTillNowFromDatabase(request, case, country):
+
+def CasesForCountryTillNowFromDatabasePlot(request, case, country):
     country = country.lower()
     url_part, status, = switchForCase(case)
     dataTable = GetDataTableWithIdentifier(casesForCountry, country)
@@ -59,6 +79,18 @@ def CasesForCountryTillNowFromDatabase(request, case, country):
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
+def CasesForCountryTillNowFromDatabaseData(request, case, country):
+    country = country.lower()
+    url_part, status, = switchForCase(case)
+    dataTable = GetDataTableWithIdentifier(casesForCountry, country)
+
+    df = pd.json_normalize(dataTable["data"])
+    cases=["Deaths","Recovered","Confirmed"]
+    cases.remove(status)
+    for caseForCountry in cases:
+        df=df.drop([caseForCountry], axis=1)
+    resultJson=df.to_json(orient="records")
+    return JsonResponse(json.loads(resultJson), safe=False)
 
 
 def getAllCasesForCountryToDatabase(request, country):
