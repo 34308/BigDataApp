@@ -22,6 +22,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('ListOfAllCountries/', views.listOfCountriesWichWeHaveDataOn),
     path('covid-allcases-plot/<str:country>/', views.getAllCasesForCountryToDatabase),
-    path('covid-<str:case>-cases-plot-db/<str:country>/', views.CasesForCountryTillNowFromDatabase),
-    path('most-deaths/', views.counrtyWithMostDeaths)
+    path('covid-<str:case>-cases-plot-db/<str:country>/', views.CasesForCountryTillNowFromDatabasePlot),
+    path('covid-<str:case>-cases-data-db/<str:country>/', views.CasesForCountryTillNowFromDatabaseData),
+    path('most-deaths/', views.countryWithMostDeathsData),
+    path('least-deaths/', views.countryWithLeastDeathsData)
+
 ]
