@@ -20,52 +20,34 @@ from DjangoDB.databaseConnector import updateOrCrateDataTable, updateOrCrateData
     GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb
 from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase, create_two_countries_plot
 
-def listOfCountriesWichWeHaveDataOn(request):
-    response = requests.get("https://api.covid19api.com/summary")
-    data = response.json()
-    countries = [c['Country'] for c in data['Countries']]
-    new_data = {"countries": countries}
-    json_data = json.dumps(new_data)
-    data_dict = json.loads(json_data)
-    updateOrCrateDataTableWithIdentifier(listOfCountries, data_dict,listOfCountries)
 
-    return JsonResponse(data_dict, safe=False)
+def getListOfCountriesWichWeHaveDataOn(request):
+    data = GetDataTableWithIdentifier(listOfCountries, listOfCountries)
+    df = pd.json_normalize(data["data"])
+    string_json = df.to_json(orient="records")
+    proper_json = json.loads(string_json)
 
-def countryWithMostDeathsData(request):
-    response = requests.get("https://api.covid19api.com/summary")
-    data = response.json()
-    countries = data["Countries"]
-    # Convert JSON data to pandas dataframe
-    df = pd.json_normalize(countries)
-    # Find country with highest deaths
-    highest_deaths = df.loc[df['TotalDeaths'].idxmax()]
-    # Create result dictionary
-    result_dict = {'Country': highest_deaths['Country'], 'death_Cases': highest_deaths['TotalDeaths']}
-    # Convert dictionary to JSON string
-    result_json = json.dumps(result_dict)
-    # Update or create data table with result JSON
-    updateOrCrateDataTableWithIdentifier(countryWithMostDeaths, result_json, countryWithMostDeaths)
-    # Return JSON response with proper content type
+    return JsonResponse(proper_json , safe=False,content_type='application/json')
+
+
+def getCountryWithMostDeathsData(request):
+    dataTable = GetDataTableWithIdentifier(countryWithMostDeaths, "CountryWithMostDeaths")
+    df = pd.json_normalize(dataTable["data"])
+    string_json = df.to_json(orient="records")
+    string_json = '[' + string_json + ']'
+    result_json = json.loads(string_json)
     return HttpResponse(result_json, content_type='application/json')
 
-def countryWithLeastDeathsData(request):
-    response = requests.get("https://api.covid19api.com/summary")
-    data = response.json()
-    countries = data["Countries"]
 
+def getCountryWithLeastDeathsData(request):
     # Find country with least deaths
-    least_deaths = min(countries, key=lambda c: c['TotalDeaths'])
+    dataTable = GetDataTableWithIdentifier(countryWithLeastDeaths, "CountryWithLeastDeaths")
+    df = pd.json_normalize(dataTable["data"])
+    string_json = df.to_json(orient="records")
+    string_json='['+string_json+']'
+    result_json = json.loads(string_json)
 
-    # Create result dictionary
-    result_dict = {'Country': least_deaths['Country'], 'death_Cases': least_deaths['TotalDeaths']}
-
-    # Convert dictionary to JSON string
-    result_json = json.dumps(result_dict)
-    # Return JSON response with proper content type
-    updateOrCrateDataTableWithIdentifier(countryWithLeastDeaths, result_json, countryWithMostDeaths)
-
-    return HttpResponse(result_json,content_type='application/json')
-
+    return HttpResponse(result_json, content_type='application/json')
 
 
 def CasesForCountryTillNowFromDatabasePlot(request, case, country):
@@ -85,30 +67,27 @@ def CasesForCountryTillNowFromDatabaseData(request, case, country):
     dataTable = GetDataTableWithIdentifier(casesForCountry, country)
 
     df = pd.json_normalize(dataTable["data"])
-    cases=["Deaths","Recovered","Confirmed"]
+    cases = ["Deaths", "Recovered", "Confirmed"]
     cases.remove(status)
     for caseForCountry in cases:
-        df=df.drop([caseForCountry], axis=1)
-    resultJson=df.to_json(orient="records")
-    return JsonResponse(json.loads(resultJson), safe=False)
-
-
-def getAllCasesForCountryToDatabase(request, country):
-    country = country.lower()
-    day, month, year = getCurrentDayMonthYear()
-    url = f'https://api.covid19api.com/country/' + country + f'?from=2020-03-01T00:00:00Z&to=' + str(year) + '-0' + str(month) + '-' + str(day) + 'T00:00:00Z'
-    print(url)
-    response = requests.get(url)
-    data = response.json()
-    df = pd.json_normalize(data)
-    df = df.drop(["CountryCode", "Province", "City", "CityCode", "Lat", "Lon"], axis=1)
-    json_str = df.to_json(orient="records")
-
-    updateOrCrateDataTableWithIdentifier(nameOfCollection=casesForCountry, dataToUpload= json.loads(json_str), name= country)
-    result_json = {"data":[f"Confirmed, Deaths, Recovered cases for {country}, correctly saved to database"]}
+        df = df.drop([caseForCountry], axis=1)
+    string_json = df.to_json(orient="records")
+    result_json = json.loads(string_json)
     return JsonResponse(result_json, safe=False)
 
-def compare_countries_by_case(request, case, first_country, second_country):
+
+def getAllCasesForCountry(request, country):
+    country = country.lower()
+
+    data = GetDataTableWithIdentifier(casesForCountry, country)
+
+    df = pd.json_normalize(data["data"])
+    string_json = df.to_json(orient="records")
+    result_json = json.loads(string_json)
+    return JsonResponse(result_json, safe=False)
+
+
+def compare_countries_by_case_plot(request, case, first_country, second_country):
     first_country = first_country.lower()
     second_country = second_country.lower()
     url_part, status, = switchForCase(case)
@@ -117,6 +96,26 @@ def compare_countries_by_case(request, case, first_country, second_country):
 
     first_country_df = pd.json_normalize(first_country_data_table["data"])
     second_country_df = pd.json_normalize(second_country_data_table["data"])
-    buffer = create_two_countries_plot(first_country, second_country, status, status, "Date", first_country_df, second_country_df)
+    buffer = create_two_countries_plot(first_country, second_country, status, status, "Date", first_country_df,
+                                       second_country_df)
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
+
+
+def compare_countries_by_case(request, case, first_country, second_country):
+    first_country = first_country.lower()
+    second_country = second_country.lower()
+    url_part, status, = switchForCase(case)
+
+    first_country_data_table = GetDataTableWithIdentifier(casesForCountry, first_country)
+    second_country_data_table = GetDataTableWithIdentifier(casesForCountry, second_country)
+
+    first_country_df = pd.json_normalize(first_country_data_table["data"])
+    second_country_df = pd.json_normalize(second_country_data_table["data"])
+    first_country_df=first_country_df[["Country",status,"Date"]].copy()
+    second_country_df=second_country_df[["Country",status,"Date"]].copy()
+    merge=[first_country_df,second_country_df]
+    result=pd.concat(merge)
+    string_json=result.to_json(orient="records")
+    result_json = json.loads(string_json)
+    return JsonResponse(result_json, safe=False)

@@ -13,12 +13,8 @@ Application should be hosted on `http://127.0.0.1:8000/`
 ## Using app
 
 App have following endpoints:
-  1) `/admin` - login us as admin
-      
-      example output: 
-      
-      <img width="297" alt="image" src="https://user-images.githubusercontent.com/86781217/236620672-26f74a68-6c74-4af0-b1dd-8c399d673695.png">
-  2) `/ListOfAllCountries` - returns list of all countries, that we can use
+
+  1) `/ListOfAllCountries` - returns list of all countries, that we can use
         
       example output:
         ```json

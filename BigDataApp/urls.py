@@ -14,15 +14,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+
 from django.urls import path
 from DjangoDB import views
-print("xxxxxxxxx")
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('ListOfAllCountries/', views.listOfCountriesWichWeHaveDataOn),
-    path('covid-allcases-plot/<str:country>/', views.getAllCasesForCountryToDatabase),
-    path('covid-<str:case>-cases-plot-db/<str:country>/', views.CasesForCountryTillNowFromDatabase),
-    path('most-deaths/', views.counrtyWithMostDeaths),
-    path('compareCountries/<str:case>/<str:first_country>/<str:second_country>', views.compare_countries_by_case)
-    ]
+    path('list-of-all-countries', views.getListOfCountriesWichWeHaveDataOn),
+    path('covid-allcases-plot/<str:country>', views.getAllCasesForCountry),
+    path('covid-<str:case>-cases-db/<str:country>', views.CasesForCountryTillNowFromDatabaseData),
+    path('covid-<str:case>-cases-plot-db/<str:country>', views.CasesForCountryTillNowFromDatabasePlot),
+    path('covid-country-with-most-deaths',views.getCountryWithMostDeathsData),
+    path('covid-country-with-least-deaths', views.getCountryWithLeastDeathsData),
+    path('covid-compare-countries-plot/<str:case>/<str:first_country>/<str:second_country>',views.compare_countries_by_case_plot),
+    path('covid-compare-countries/<str:case>/<str:first_country>/<str:second_country>', views.compare_countries_by_case)
+
+]

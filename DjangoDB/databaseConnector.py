@@ -124,7 +124,16 @@ def GetDataTableWithIdentifier(nameOfCollection, name):
         return results
     else:
         raise Exception("No such table")
+def GetDataTable(nameOfCollection):
+    dbname = getDatabase()
+    collection = dbname[nameOfCollection]
 
+    if collection:
+        # update
+        dbname.client.close()
+        return collection
+    else:
+        raise Exception("No such table")
 
 def GetDataUpdateTableWithIdentifierAndCase(nameOfCollection, country):
     dbname = getDatabase()
