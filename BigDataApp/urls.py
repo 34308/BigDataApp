@@ -26,6 +26,7 @@ urlpatterns = [
     path('covid-country-with-most-deaths',views.getCountryWithMostDeathsData),
     path('covid-country-with-least-deaths', views.getCountryWithLeastDeathsData),
     path('covid-compare-countries-plot/<str:case>/<str:first_country>/<str:second_country>',views.compare_countries_by_case_plot),
-    path('covid-compare-countries/<str:case>/<str:first_country>/<str:second_country>', views.compare_countries_by_case)
+    path('covid-compare-countries/<str:case>/<str:first_country>/<str:second_country>', views.compare_countries_by_case),
+    path('covid-death-to-recovery/<str:country>/<int:n>', views.DeathAndRecoveryForCountryTillNowFromDatabasePlot)
 
 ]

@@ -3,6 +3,10 @@ import io
 import matplotlib.pyplot as plt
 import math
 
+import pandas as pd
+import plotly.express as px
+import plotly.io as pio
+from kaleido.scopes.plotly import PlotlyScope
 def getCurrentDayMonthYear():
     day = datetime.date.today().day
     month = datetime.date.today().month
@@ -40,7 +44,23 @@ def plotCreator(country, case, ylabel, xlabel, df):
     plt.savefig(buffer, format='png')
     plt.close(fig)
     return buffer
+def piePlotCreator(country, df, flabel, slabel, n):
 
+    array=df.values
+    row=array[n]
+
+    labels=[flabel,slabel]
+    values = [row[3], row[4]]
+
+    fig = px.pie(title=country+" | "+row[6],values=values, names=labels,
+                 color_discrete_sequence=px.colors.sequential.RdBu)
+    fig.update_traces(textposition='inside',
+                      textinfo='percent+label+value',
+                      marker=dict(line=dict(color='#FFFFFF', width=2)),
+                      textfont_size=12)
+    buffer = io.BytesIO()
+    pio.write_image(fig, buffer, format='png')
+    return buffer
 def create_two_countries_plot(first_country, second_country, case, y_label, x_label, first_country_df, second_country_df):
     fig, ax = plt.subplots()
     dates = first_country_df[x_label]

@@ -5,10 +5,11 @@ import requests
 import urllib, json
 from django.http import JsonResponse, HttpResponse
 import pandas as pd
-from pymongo import MongoClient
-from bson import ObjectId
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from pymongo import MongoClient
+from bson import ObjectId
+
 import io
 import base64
 import time
@@ -18,7 +19,8 @@ from DjangoDB.Tables import listOfCountries, countryWithMostDeaths, Cases, basic
     countryWithLeastDeaths
 from DjangoDB.databaseConnector import updateOrCrateDataTable, updateOrCrateDataTableWithIdentifier, getDatabase, \
     GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb
-from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase, create_two_countries_plot
+from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase, create_two_countries_plot, \
+    piePlotCreator
 
 
 def getListOfCountriesWichWeHaveDataOn(request):
@@ -60,6 +62,14 @@ def CasesForCountryTillNowFromDatabasePlot(request, case, country):
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
+def DeathAndRecoveryForCountryTillNowFromDatabasePlot(request, country,n):
+    country = country.lower()
+    dataTable = GetDataTableWithIdentifier(casesForCountry, country)
+
+    df = pd.json_normalize(dataTable["data"])
+    buffer = piePlotCreator(country,df,"Deaths","Recovery",n)
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 def CasesForCountryTillNowFromDatabaseData(request, case, country):
     country = country.lower()
