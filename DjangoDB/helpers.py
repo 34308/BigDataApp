@@ -44,6 +44,31 @@ def plotCreator(country, case, ylabel, xlabel, df):
     plt.savefig(buffer, format='png')
     plt.close(fig)
     return buffer
+
+
+def plotCreatorForAllCases(df):
+    fig, ax = plt.subplots()
+
+    dates = df["Date"]
+
+    ax.plot(dates, df["Deaths"], label="Deaths")
+    ax.plot(dates, df["Recovered"], label="Recovered")
+    ax.plot(dates, df["Confirmed"], label="Confirmed")
+
+    middle = math.ceil(len(dates) / 2)
+
+    plt.xticks([dates[0], dates[middle], dates[len(dates) - 1]], visible=True)
+    ax.set_title("COVID-19 All Cases in " + df["Country"].iloc[0])
+    ax.set_xlabel("Date")
+    ax.set_ylabel("All Cases")
+
+    ax.legend()  # Add legend to show labels for each line
+
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    plt.close(fig)
+    buffer.seek(0)  # Reset buffer position to the beginning
+    return buffer
 def piePlotCreator(country, df, flabel, slabel, n):
 
     array=df.values

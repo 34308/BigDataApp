@@ -20,7 +20,7 @@ from DjangoDB.Tables import listOfCountries, countryWithMostDeaths, Cases, basic
 from DjangoDB.databaseConnector import updateOrCrateDataTable, updateOrCrateDataTableWithIdentifier, getDatabase, \
     GetDataTableWithIdentifier, updateOrCrateDataTableWithIdentifierWithDb
 from DjangoDB.helpers import getCurrentDayMonthYear, plotCreator, switchForCase, create_two_countries_plot, \
-    piePlotCreator
+    piePlotCreator, plotCreatorForAllCases
 
 
 def getListOfCountriesWichWeHaveDataOn(request):
@@ -96,7 +96,14 @@ def getAllCasesForCountry(request, country):
     result_json = json.loads(string_json)
     return JsonResponse(result_json, safe=False)
 
+def getAllCasesForCountryPlot(request, country):
+    country = country.lower()
+    dataTable = GetDataTableWithIdentifier(casesForCountry, country)
 
+    df = pd.json_normalize(dataTable["data"])
+    buffer = plotCreatorForAllCases(df)
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
 def compare_countries_by_case_plot(request, case, first_country, second_country):
     first_country = first_country.lower()
     second_country = second_country.lower()
